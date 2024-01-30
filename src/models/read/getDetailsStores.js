@@ -1,12 +1,3 @@
-// create lookup object an array
-const createLookup = (array, key) => {
-  const lookup = {};
-  array.forEach((item) => {
-    lookup[item[key]] = item;
-  });
-  return lookup;
-};
-
 // helper function to add result to the array
 const addResult = (result, advisor, store, stock_part, detail) => {
   if (!store || !stock_part || detail.stock_part === 0) return;
@@ -21,6 +12,7 @@ const addResult = (result, advisor, store, stock_part, detail) => {
     origin_part: stock_part.origin_part,
     stock_part: detail.stock_part,
     cost_part: stock_part.cost_part,
+    type_change: stock_part.type_the_change,
   });
 };
 
@@ -46,6 +38,7 @@ const joinTables = (
     // if admin, add all stores
     if (advisor.role_user === "admin") {
       detail_stores.forEach((detail) => {
+        if (detail.id_store === 8) return;
         addResult(
           result,
           advisor,
@@ -53,21 +46,6 @@ const joinTables = (
           stockPartLookup[detail.id_part],
           detail
         );
-      });
-
-      // add all stock parts from central store
-      stock_parts.forEach((stock_part) => {
-        result.push({
-          store: "Bodega Central",
-          id_store: 6,
-          advisor: advisor.name_advisor,
-          id_part: stock_part.id_part,
-          name_part: stock_part.name_part,
-          status_part: stock_part.status_part,
-          origin_part: stock_part.origin_part,
-          stock_part: stock_part.stock_part,
-          cost_part: stock_part.cost_part,
-        });
       });
     } else {
       // for not admin users, add only stores that belong to the user
@@ -90,7 +68,7 @@ const joinTables = (
   return result;
 };
 
-// Get stores data
+// Get data for tables and join result
 const getStoresData = (id_advisor) => {
   const stores = getSheetData(BD, ssStore);
   const advisors = getSheetData(BD, ssAdvisors);
@@ -109,6 +87,7 @@ const getStoresData = (id_advisor) => {
   if (result.length === 0) {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: ["error"],
         details: "stores not found",
         data: result,
       })
@@ -116,13 +95,10 @@ const getStoresData = (id_advisor) => {
   } else {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: [],
         details: "stores",
         data: result,
       })
     ).setMimeType(ContentService.MimeType.JSON);
   }
 };
-
-function test() {
-  console.log(getStoresData("2"));
-}

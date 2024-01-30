@@ -18,6 +18,7 @@ const getUsers = (emails) => {
   if (result.length === 0) {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: ["error"],
         details: "users not found",
         data: result,
       })
@@ -25,6 +26,7 @@ const getUsers = (emails) => {
   } else {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: [],
         details: "users",
         data: result,
       })

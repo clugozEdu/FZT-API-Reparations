@@ -1,7 +1,9 @@
+// BD reparations
 const BD = SpreadsheetApp.openById(
   "1G5-5uE-OJPtkA3lIpe_uG3r66HCI_p3nxZ4aQW0vmxA"
 );
 
+// globals variables
 const ssStore = "stores";
 const ssAdvisors = "advisors";
 const ssStockParts = "stock_parts";
@@ -10,9 +12,10 @@ const ssOrders = "orders";
 const ssDetailOrders = "detail_orders";
 const ssTypeMovements = "type_movements";
 const ssMovement = "logs_movements";
-const testStockParts = "test_stock_parts";
-const testDetailStore = "test_detail_stores";
+// const testStockParts = "test_stock_parts";
+// const testDetailStore = "test_detail_stores";
 
+// get data from sheet and return object with headers how keys
 const getSheetData = (nameSpreadSheet, nameSheet) => {
   let data = [];
   const sheet = nameSpreadSheet.getSheetByName(nameSheet);
@@ -30,31 +33,60 @@ const getSheetData = (nameSpreadSheet, nameSheet) => {
   return data;
 };
 
+// set data in BD
 const setDataInBD = (nameSpreadSheet, nameSheet, data) => {
   const sheet = nameSpreadSheet.getSheetByName(nameSheet);
 
   sheet.appendRow(data);
 };
 
-/// function post
+/// function post read data in sheet
 const readSheetData = (sheetName, numColumns) => {
   const sheet = BD.getSheetByName(sheetName);
+
+  // Verificar si la hoja está vacía o solo tiene encabezados
+  if (sheet.getLastRow() <= 1) {
+    return []; // Devolver un arreglo vacío si no hay datos
+  }
+
+  // Si hay datos, obtenerlos y devolverlos
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, numColumns).getValues();
 };
 
+// set data in sheet POST
 const writeSheetData = (sheetName, data) => {
   const sheet = BD.getSheetByName(sheetName);
   sheet.getRange(2, 1, data.length, data[0].length).setValues(data);
 };
 
-const deleteRowsFromSheet = (sheetName, rowsToDelete) => {
-  const sheet = BD.getSheetByName(sheetName);
-
-  // Ordenar los índices de las filas en orden descendente para evitar problemas con los índices cambiantes
-  rowsToDelete.sort((a, b) => b - a);
-
-  // Eliminar filas de atrás hacia adelante
-  rowsToDelete.forEach((row) => {
-    sheet.deleteRow(row);
+// create lookup object an array
+const createLookup = (array, key) => {
+  const lookup = {};
+  array.forEach((item) => {
+    lookup[item[key]] = item;
   });
+  return lookup;
+};
+
+// get advisor for store
+const advisorsStores = (idStore) => {
+  const data = getSheetData(BD, ssStore);
+
+  // find store
+  const resultStore = data.find((row) => row.id_store === idStore);
+
+  // validate if store exist
+  if (!resultStore) {
+    return []; // O manejar el caso de no encontrar nada de manera adecuada
+  }
+
+  // get advisors
+  const advisor = getSheetData(BD, ssAdvisors);
+
+  // find advisors for store
+  const resultAdvisor = advisor.filter(
+    (row) => row.id_advisor === resultStore.id_advisor
+  );
+
+  return resultAdvisor[0].id_advisor;
 };

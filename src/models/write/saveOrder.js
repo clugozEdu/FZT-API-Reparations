@@ -1,3 +1,4 @@
+// create orders
 const createOrder = (data) => {
   // validate if contexts is admin or advisors
   let attends = data.context !== "transfersAdmin" ? false : true;
@@ -13,7 +14,11 @@ const createOrder = (data) => {
   const date_order = data.date_order;
   const dateRegister = Utilities.formatDate(new Date(), "GMT-6", "dd/MM/yyyy");
   //const dateUpdate = "No update";
-  const idStore = getIdStoreForAdvisor(data.id_advisor);
+  // if admin asign store 6
+  const idStore =
+    data.context !== "transfersAdmin"
+      ? getIdStoreForAdvisor(data.id_advisor)
+      : [6];
 
   const order = [
     idOrder,
@@ -31,6 +36,7 @@ const createOrder = (data) => {
   return idOrder;
 };
 
+// function await order and create detail order
 const generateDetailOrder = (idOrder, data) => {
   const sheet = BD.getSheetByName(ssDetailOrders);
   const parts = data.parts;
@@ -44,9 +50,16 @@ const generateDetailOrder = (idOrder, data) => {
   });
 };
 
+// function generate id for order and detail order
 const mainOrder = (data) => {
   const idOrder = createOrder(data);
   generateDetailOrder(idOrder, data);
 
-  return `Orden creada con éxito, su número de orden es: ${idOrder}`;
+  return ContentService.createTextOutput(
+    JSON.stringify({
+      error: [],
+      details: "order created",
+      idOrder: idOrder,
+    })
+  );
 };

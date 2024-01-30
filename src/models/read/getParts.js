@@ -5,6 +5,7 @@ const getDetailsPart = () => {
   if (data.length === 0) {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: ["error"],
         details: "details not found",
         data: data,
       })
@@ -12,6 +13,7 @@ const getDetailsPart = () => {
   } else {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: [],
         details: "details the parts",
         data: data,
       })

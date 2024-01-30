@@ -1,3 +1,4 @@
+// get Orders data
 const getOrders = (status) => {
   const data = getSheetData(BD, ssOrders);
   let result = [];
@@ -8,6 +9,7 @@ const getOrders = (status) => {
     });
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: [],
         details: "orders",
         data: result,
       })
@@ -15,6 +17,7 @@ const getOrders = (status) => {
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: [error],
         details: "error",
         data: error,
       })

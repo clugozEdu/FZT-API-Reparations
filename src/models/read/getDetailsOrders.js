@@ -8,19 +8,13 @@ const joinTablesOrders = (
   logs_orders,
   specificIdOrders // array
 ) => {
-  // Maps for acces by ID
-  const ordersMap = new Map(orders.map((o) => [o.id_order, o]));
-  const typeMovementsMap = new Map(
-    type_movements.map((tm) => [tm.id_movements, tm])
-  );
-  const storesMap = new Map(stores.map((s) => [s.id_store, s]));
-  const advisorsMap = new Map(advisors.map((a) => [a.id_advisor, a]));
-  const stockPartsMap = new Map(stock_parts.map((sp) => [sp.id_part, sp]));
-  const logsOrdersMap = new Map(
-    logs_orders.map((log) => [log.id_detail_order, log])
-  );
+  const ordersLookup = createLookup(orders, "id_order");
+  const typeMovementsLookup = createLookup(type_movements, "id_movements");
+  const storesLookup = createLookup(stores, "id_store");
+  const advisorsLookup = createLookup(advisors, "id_advisor");
+  const stockPartsLookup = createLookup(stock_parts, "id_part");
+  const logsOrdersLookup = createLookup(logs_orders, "id_detail_order");
 
-  // Filter detail_order if specificIdOrders is not empty
   const filteredDetailOrders =
     specificIdOrders?.length > 0
       ? detail_orders.filter((detailOrder) =>
@@ -28,16 +22,18 @@ const joinTablesOrders = (
         )
       : detail_orders;
 
-  // Build data to return
   return filteredDetailOrders.map((detailOrder) => {
-    const order = ordersMap.get(detailOrder.id_order);
-    const typeMovement = order
-      ? typeMovementsMap.get(order.id_movements)
-      : null;
-    const store = order ? storesMap.get(order.id_store) : null;
-    const advisor = store ? advisorsMap.get(store.id_advisor) : null;
-    const stockPart = stockPartsMap.get(detailOrder.id_part);
-    const logOrder = logsOrdersMap.get(detailOrder.id_order);
+    // get detailOrder data
+    const order = ordersLookup[detailOrder.id_order];
+    const typeMovement = order ? typeMovementsLookup[order.id_movements] : null;
+    // get store data
+    const store = order ? storesLookup[order.id_store] : null;
+    // get advisor data with id_advisor from store
+    const advisor = store ? advisorsLookup[store.id_advisor] : null;
+    // get stock part data
+    const stockPart = stockPartsLookup[detailOrder.id_part];
+    // get log order data
+    const logOrder = logsOrdersLookup[detailOrder.id_detail_order];
 
     return {
       id_order: order?.id_order ?? null,
@@ -82,11 +78,10 @@ const getDetailsOrders = (id_order) => {
     id_order
   );
 
-  console.log(result);
-
   if (result.length === 0) {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: ["error"],
         details: "orders not found",
         data: result,
       })
@@ -94,13 +89,10 @@ const getDetailsOrders = (id_order) => {
   } else {
     return ContentService.createTextOutput(
       JSON.stringify({
+        error: [],
         details: "orders details",
         data: result,
       })
     ).setMimeType(ContentService.MimeType.JSON);
   }
-};
-
-const test33 = () => {
-  console.log(getDetailsOrders([3]));
 };

@@ -1,4 +1,3 @@
-// update status of orders
 const updateOrder = (dataOrder) => {
   const data = readSheetData(ssOrders, 8);
   let idOrder;
@@ -52,26 +51,40 @@ const updateStores = (order_details, contextPost) => {
     const idMovements = element.id_movements;
     const idStore = element.id_store;
     const id_detail_order = element.id_detail_order;
+    const idStoreAdmin = 6;
+    const idAdvisorAdmin = advisorsStores(idStoreAdmin);
+    const idStoreLow = 8;
 
     // context aproved order
     if (contextPost === "approvedOrder") {
       // movements 1: request the parts to central
       if (idMovements === 1) {
-        updateStoreCentral(idPart, amount, false);
+        updateStoreAdvisor(idPart, amount, idStoreAdmin, false);
         updateStoreAdvisor(idPart, amount, idStore, true);
-        createLogMovement(id_detail_order, 6, idStore);
+        createLogMovement(
+          id_detail_order,
+          idStoreAdmin,
+          idStore,
+          idAdvisorAdmin
+        );
         // movents 2: request the low parts for advisor
       } else if (idMovements === 2) {
         updateStoreAdvisor(idPart, amount, idStore, false);
-        createLogMovement(id_detail_order, idStore, false);
+        updateStoreAdvisor(idPart, amount, idStoreLow, true);
+        createLogMovement(id_detail_order, idStore, idStoreLow, idAdvisorAdmin);
       }
       // context rejected order
     } else if (contextPost === "rejectedOrder") {
       // generate logs for type movements
       if (idMovements === 1) {
-        createLogMovement(id_detail_order, 6, idStore);
+        createLogMovement(
+          id_detail_order,
+          idStoreAdmin,
+          idStore,
+          idAdvisorAdmin
+        );
       } else if (idMovements === 2) {
-        createLogMovement(id_detail_order, idStore, false);
+        createLogMovement(id_detail_order, idStore, idStoreLow, idAdvisorAdmin);
       }
     }
   });
@@ -79,52 +92,59 @@ const updateStores = (order_details, contextPost) => {
 
 // update stores for advisors
 const updateStoreAdvisor = (idPart, amount, idStore, isAdding) => {
-  const data = readSheetData(testDetailStore, 3);
+  const sheetDetailStore = BD.getSheetByName(ssDetailStore);
+  const idDetailStore = generateId(sheetDetailStore);
+  const data = readSheetData(ssDetailStore, 4);
   // validation for new register
   let found = false;
   // find part in store for advisor and update amount
   const updatedData = data.map((row, index) => {
-    if (row[1] === idPart && row[0] === idStore) {
+    if (row[2] === idPart && row[1] === idStore) {
       found = true;
-      row[2] = isAdding ? row[2] + amount : row[2] - amount;
+      row[3] = isAdding ? row[3] + amount : row[3] - amount;
     }
     return row;
   });
 
   // if not found part in store for advisor, create new register
   if (!found) {
-    updatedData.push([idStore, idPart, amount]);
+    updatedData.push([idDetailStore, idStore, idPart, amount]);
   }
 
   // set changes in BD
-  writeSheetData(testDetailStore, updatedData);
+  writeSheetData(ssDetailStore, updatedData);
 };
 
-// update stores for central
-const updateStoreCentral = (idPart, amount, isAdding) => {
-  const data = readSheetData(testStockParts, 6);
-  // validation for new register
-  let found = false;
+// // update stores for central
+// const updateStoreCentral = (idPart, amount, isAdding) => {
+//   const data = readSheetData(testStockParts, 6);
+//   // validation for new register
+//   let found = false;
 
-  // find part in store for central and update amount
-  const updatedData = data.map((row) => {
-    if (row[0] === idPart) {
-      found = true;
-      row[5] = isAdding ? row[5] + amount : row[5] - amount;
-    }
-    return row;
-  });
+//   // find part in store for central and update amount
+//   const updatedData = data.map((row) => {
+//     if (row[0] === idPart) {
+//       found = true;
+//       row[5] = isAdding ? row[5] + amount : row[5] - amount;
+//     }
+//     return row;
+//   });
 
-  // if not found part in store for central, create new register
-  if (!found) {
-    updatedData.push([idPart, amount]);
-  }
-  // set changes in BD
-  writeSheetData(testStockParts, updatedData);
-};
+//   // if not found part in store for central, create new register
+//   if (!found) {
+//     updatedData.push([idPart, amount]);
+//   }
+//   // set changes in BD
+//   writeSheetData(testStockParts, updatedData);
+// };
 
 // create logs of movements
-const createLogMovement = (idDetailOrder, idStoreExit, idStoreEntry) => {
+const createLogMovement = (
+  idDetailOrder,
+  idStoreExit,
+  idStoreEntry,
+  idAdvisorAdmin
+) => {
   const sheet = BD.getSheetByName(ssMovement);
   // generate id for movement
   const idMovement = generateId(sheet);
@@ -137,6 +157,7 @@ const createLogMovement = (idDetailOrder, idStoreExit, idStoreEntry) => {
     idStoreExit,
     idStoreEntry,
     dateMovement,
+    idAdvisorAdmin,
   ];
 
   // set changes in BD
@@ -150,5 +171,24 @@ const mainUpdateOrder = (data) => {
   // get id order and context for message of response
   const idOrder = dataOrder[0];
   let context = dataOrder[1] === "approvedOrder" ? "aprobada" : "rechazada";
-  return `Orden con id ${idOrder} ${context} con éxito`;
+
+  // try catch for errors
+  try {
+    // return message of response
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        error: [],
+        details: `Orden ${idOrder} ${context} con exito`,
+        idOrder: idOrder,
+      })
+    );
+  } catch (error) {
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        error: [error.error],
+        details: `Orden ${idOrder} ${context} con exito`,
+        idOrder: idOrder,
+      })
+    );
+  }
 };
