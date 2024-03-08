@@ -8,6 +8,7 @@ const joinTablesOrders = (
   logs_orders,
   specificIdOrders // array
 ) => {
+  // create lookup for each sheets and find by keys
   const ordersLookup = createLookup(orders, "id_order");
   const typeMovementsLookup = createLookup(type_movements, "id_movements");
   const storesLookup = createLookup(stores, "id_store");
@@ -15,6 +16,7 @@ const joinTablesOrders = (
   const stockPartsLookup = createLookup(stock_parts, "id_part");
   const logsOrdersLookup = createLookup(logs_orders, "id_detail_order");
 
+  // find only detalis orders with the same id_order
   const filteredDetailOrders =
     specificIdOrders?.length > 0
       ? detail_orders.filter((detailOrder) =>
@@ -59,6 +61,7 @@ const joinTablesOrders = (
 
 // Get details of orders
 const getDetailsOrders = (id_order) => {
+  // arrays for BD
   const stores = getSheetData(BD, ssStore);
   const type_movements = getSheetData(BD, ssTypeMovements);
   const stock_parts = getSheetData(BD, ssStockParts);
@@ -67,6 +70,7 @@ const getDetailsOrders = (id_order) => {
   const logs_orders = getSheetData(BD, ssMovement);
   const advisors = getSheetData(BD, ssAdvisors);
 
+  // call joinTablesOrders with arguments arrays for BD
   const result = joinTablesOrders(
     stores,
     type_movements,
@@ -78,6 +82,7 @@ const getDetailsOrders = (id_order) => {
     id_order
   );
 
+  // validate result and create text output for google
   if (result.length === 0) {
     return ContentService.createTextOutput(
       JSON.stringify({

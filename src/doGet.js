@@ -31,6 +31,20 @@ const doGet = (e) => {
             .filter((id) => !isNaN(id));
         }
         return getDetailsOrders(specificIdOrders);
+
+      // Schools api
+      case "getDataSchools":
+        return getDataSchools();
+
+      case "getDetailPartsReparation":
+        return mainReparations();
+
+      case "getRepairsRecords":
+        return getRepairsRecords(e.parameters.id_advisor);
+
+      case "getRepairsDetails":
+        return getRepairsDetails(e.parameters.id_repair);
+
       default:
         throw new Error("Context not found");
     }

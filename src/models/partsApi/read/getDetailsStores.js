@@ -7,6 +7,8 @@ const addResult = (result, advisor, store, stock_part, detail) => {
     id_store: store.id_store,
     advisor: advisor.name_advisor,
     id_part: stock_part.id_part,
+    need_stock: stock_part.need_stock,
+    id_level_incidence: stock_part.id_level_incidence,
     name_part: stock_part.name_part,
     status_part: stock_part.status_part,
     origin_part: stock_part.origin_part,

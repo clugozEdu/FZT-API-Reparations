@@ -16,6 +16,10 @@ const doPost = (e) => {
         let resultTransfersAdmin = setTransfersAdmin(params);
         return resultTransfersAdmin;
 
+      case "reparations":
+        let resultReparations = saveReparation(params);
+        return resultReparations;
+
       default:
         return ContentService.createTextOutput(
           "El tipo de registro no es válido"

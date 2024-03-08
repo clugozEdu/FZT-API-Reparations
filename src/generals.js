@@ -1,9 +1,24 @@
 // BD reparations
 const BD = SpreadsheetApp.openById(
-  "1G5-5uE-OJPtkA3lIpe_uG3r66HCI_p3nxZ4aQW0vmxA"
+  "1uaM7fuJIFs3Ry2oNRLAYBnc7STDa7OTiHFO5ZlKL8bI"
 );
 
-// globals variables
+// BD RepairsDetails
+const BDRepairs = SpreadsheetApp.openById(
+  "1bYBjY2ks8DHIB7v8gmPXazhQX6d-p6GRtRyyCUfBHzE"
+);
+
+// BD Setting PIAR
+const BDSchools = SpreadsheetApp.openById(
+  "1QH8WqHVmUNUufCV7XNcHwRA_-glUlbLiv-_Dx6zu_Qc"
+);
+
+// BD Info the stores and reparations
+const BDInfo = SpreadsheetApp.openById(
+  "1bYBjY2ks8DHIB7v8gmPXazhQX6d-p6GRtRyyCUfBHzE"
+);
+
+// globals variables for api parts
 const ssStore = "stores";
 const ssAdvisors = "advisors";
 const ssStockParts = "stock_parts";
@@ -12,8 +27,20 @@ const ssOrders = "orders";
 const ssDetailOrders = "detail_orders";
 const ssTypeMovements = "type_movements";
 const ssMovement = "logs_movements";
-// const testStockParts = "test_stock_parts";
-// const testDetailStore = "test_detail_stores";
+const ssTypeIncidences = "type_incidence";
+const ssLevelIncidences = "level_incidence";
+const ssReparations = "reparations";
+const ssReparationsAdvisor = "reparations";
+
+// globals variables for api schools
+const ssSchools = "school";
+const ssUsers = "user";
+
+// globals variables for info BD
+const reparationsInfo = "repatations";
+// justifications parts for BD
+const justificationParts = "justification_parts";
+const ssConciliation = "data_conciliation";
 
 // get data from sheet and return object with headers how keys
 const getSheetData = (nameSpreadSheet, nameSheet) => {
